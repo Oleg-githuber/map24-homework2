@@ -19,9 +19,9 @@ int main()
     printData(data1, data2);
 
     // Вызовы разных swap
-    //swap_lock(data1, data2);
+    swap_lock(data1, data2);
     //swap_unique_lock(data1, data2);
-    swap_scoped_lock(data1, data2);
+    //swap_scoped_lock(data1, data2);
 
     std::cout << "Swaped!\n";
     printData(data1, data2);
@@ -58,22 +58,21 @@ void swap(Data& data1, Data& data2)
 /// <param name="data2">Второй объект</param>
 void swap_lock(Data& data1, Data& data2)
 {
-    data1.m.lock();
-    data2.m.lock();
+    std::lock(data1.m, data2.m);
+    std::lock_guard<std::mutex> lg1{ data1.m, std::adopt_lock };
+    std::lock_guard<std::mutex> lg2{ data2.m, std::adopt_lock };
     swap(data1, data2);
-    data1.m.unlock();
-    data2.m.unlock();
 }
 
 /// <summary>
-/// swap с исполльзованием unique_lock без взаимной блокировки
+/// swap с исполльзованием unique_lock
 /// </summary>
 /// <param name="data1">Первый объект</param>
 /// <param name="data2">Второй объект</param>
 void swap_unique_lock(Data& data1, Data& data2)
 {
-    std::unique_lock<std::mutex> ul1{ data1.m };
-    std::unique_lock<std::mutex> ul2{ data2.m };
+    std::unique_lock<std::mutex> ul1{ data1.m, std::defer_lock };
+    std::unique_lock<std::mutex> ul2{ data2.m, std::defer_lock };
     swap(data1, data2);
 }
 
